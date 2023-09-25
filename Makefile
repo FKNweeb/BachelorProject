@@ -1,10 +1,18 @@
-all:
-	dotnet build
+.PHONY: all clean test
+
+all: test benchmark clean
 
 clean:
-	dotnet clean
-	sudo rm -rf bin obj
-	sudo rm -rf tests/bin tests/obj
+	dotnet clean tests/
+	dotnet clean BenchMarkCuckoo/
+	dotnet clean BachelorProject.csproj
 
 test:
+	dotnet clean tests/
 	dotnet test tests/
+
+benchmark:
+	dotnet clean BenchMarkCuckoo/
+	dotnet build BenchMarkCuckoo/BenchMarkCuckoo.csproj
+	dotnet build BachelorProject.csproj
+	dotnet run --project BachelorProject.csproj

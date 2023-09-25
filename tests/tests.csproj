@@ -4,7 +4,6 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
@@ -20,5 +19,11 @@
   <ItemGroup>
     <ProjectReference Include="..\BachelorProject.csproj" />
   </ItemGroup>
+
+  <Target Name="PostClean" AfterTargets="Clean">
+    <Exec Command="rm obj/ -r" />
+    <Exec Command="rm bin/ -r" />
+    <Exec Command="echo Hit it with hammer clean complete" />
+  </Target>
 
 </Project>
