@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.8" />
+    <ProjectReference Include="..\BachelorProject.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <Target Name="PostClean" AfterTargets="Clean">
+    <Exec Command="rm bin/ -r" />
+    <Exec Command="rm obj/ -r" />
+    <Exec Command="echo Hit it with hammer clean complete" />
+  </Target>
+
+</Project>
