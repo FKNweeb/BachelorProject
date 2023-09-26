@@ -13,6 +13,7 @@ test:
 
 benchmark:
 	dotnet clean BenchMarkCuckoo/
+	dotnet clean tests/
 	dotnet build BenchMarkCuckoo/BenchMarkCuckoo.csproj
 	dotnet build BachelorProject.csproj
 	dotnet run --project BachelorProject.csproj
