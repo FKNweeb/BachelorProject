@@ -10,11 +10,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <Target Name="PostClean" AfterTargets="Clean">
-    <Exec Command="rm bin/ -r" />
-    <Exec Command="rm obj/ -r" />
-    <Exec Command="echo Hit it with hammer clean complete" />
-  </Target>
-
 </Project>

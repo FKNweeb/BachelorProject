@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,11 +21,5 @@
   <ItemGroup>
     <ProjectReference Include="..\BachelorProject.csproj" />
   </ItemGroup>
-
-  <Target Name="PostClean" AfterTargets="Clean">
-    <Exec Command="rm obj/ -r" />
-    <Exec Command="rm bin/ -r" />
-    <Exec Command="echo Hit it with hammer clean complete" />
-  </Target>
 
 </Project>
