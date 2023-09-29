@@ -16,6 +16,7 @@ namespace CuckooHashTable {
         private Random _random = new Random();
         // Dictionary {1....r1}
         private Dictionary<int, List<int>> _keyDictionary = new Dictionary<int, List<int>>();
+        public int LastAttemptCount { get ; private set; }
 
         public Container (int numTables, int numElements) {
             this._numTables = numTables;
@@ -29,53 +30,30 @@ namespace CuckooHashTable {
             }
         }
 
-        public void Insert(int key) {
+        public bool Insert(int key) {
+            LastAttemptCount = 0;
             if (!_keyDictionary.ContainsKey(key)) {
                 _keyDictionary.Add(key, ListOfRandomNumbers());
             }
 
             for (int i = 0; i < MaxAttempts; i++)
             {
+                LastAttemptCount++;
                 int chosenTable = GetRandomTable();
                 var randomTable = _tables[chosenTable];
                 var pos = _keyDictionary[key][chosenTable];
                 // Stop condition
                 if(randomTable._table[pos] == 0) {
                     randomTable._table[pos] = key;
-                    return;
+                    return true;
                 }
                 int displacedItem = randomTable._table[pos];
                 randomTable._table[pos] = key;
                 key = displacedItem;
             }
-            RehashElement(key);
+            return false;
         }
 
-
-/*
-        public void Insert(int key) {
-            if (!_keyDictionary.ContainsKey(key)) {
-                _keyDictionary.Add(key, ListOfRandomNumbers());
-            }
-
-            int chosenTable = 0;
-            for (int i = 0; i < MaxAttempts; i++)
-            {
-                int pos = _keyDictionary[key][chosenTable];
-                if(_tables[chosenTable]._table[pos] == 0) {
-                    _tables[chosenTable]._table[pos] = key;
-                    Console.WriteLine("Success");
-                    return;
-                }
-                int displacedItem = _tables[chosenTable]._table[pos];
-                _tables[chosenTable]._table[pos] = key;
-                key = displacedItem;
-                if(chosenTable == 0) { chosenTable++; }
-                else { chosenTable--; }
-            }
-            RehashElement(key);
-        }
-*/
         private int GetRandomTable() {
             return _random.Next(_numTables);
         }
@@ -90,13 +68,33 @@ namespace CuckooHashTable {
             return result;
         }
 
-        private void RehashElement(int key) {
-            Console.WriteLine($"Couldn't fit {key}");
-        }
-
         public bool Contains(int key)
         { 
-            return _keyDictionary.ContainsKey(key);
+            for (int i = 0; i < _numTables; i++)
+            {
+                try
+                {
+                    if (_tables[i]._table[_keyDictionary[key][i]] == key) { return true; } 
+                }
+                catch (System.Exception) { return false; }
+            }
+            return false;
+        }
+
+        public double HowFilled() {
+            int storage = 0;
+
+            for (int i = 0; i < _numTables; i++)
+            {
+                for (int j = 0; j < _numElements; j++)
+                {
+                    if (_tables[i]._table[j] != 0){
+                        storage++;
+                    }
+
+                }
+            }
+            return (double)storage/(_numTables * _numElements); 
         }
     }
 }
