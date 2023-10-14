@@ -96,5 +96,23 @@ namespace CuckooHashTable {
             }
             return (double)storage/(_numTables * _numElements); 
         }
+
+        public double AvgLookUpTime() {
+            int sum = 0;
+            int n = 0;
+            for (int i = 0; i < _numTables; i++)
+            {
+                int partSum = 0;
+                for (int j = 0; j < _numElements; j++)
+                {
+                    if (_tables[i]._table[j] != 0){
+                        partSum++;
+                        n++;
+                    }
+                }
+                sum += i * partSum;
+            }
+            return sum / n;
+        }
     }
 }
