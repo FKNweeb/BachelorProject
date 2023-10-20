@@ -98,7 +98,7 @@ namespace CuckooHashTable {
         }
 
         public double AvgLookUpTime() {
-            int sum = 0;
+            double sum = 0.0;
             int n = 0;
             for (int i = 0; i < _numTables; i++)
             {
@@ -110,7 +110,7 @@ namespace CuckooHashTable {
                         n++;
                     }
                 }
-                sum += i * partSum;
+                sum += (i + 1) * partSum;
             }
             return sum / n;
         }
