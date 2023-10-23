@@ -10,7 +10,7 @@
   </PropertyGroup>
 
    <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.9-nightly.20231003.76" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.10-nightly.20231016.88" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit.Analyzers" Version="3.3.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />

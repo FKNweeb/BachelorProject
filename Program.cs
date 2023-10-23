@@ -11,17 +11,37 @@ class Program
 {
     static void Main(string[] args)
     {
-        // BenchMarks Run First
-        // var config = BenchmarkDotNet.Configs.DefaultConfig.Instance.WithOptions(ConfigOptions.DisableOptimizationsValidator);
-        // BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
+        // Range of table tests
+        int minTables = 2;
+        int maxTables = 10;
 
-        // Let's do some analytical testing to check for any empirical correlations between m(Number of Keys) and MaxAttempts
+        // Key List
         List<int> keyCounts = new List<int> { 1000, 5000, 10000, 20000, 50000, 100000 };
+
+        for (int tableCount = minTables; tableCount <= maxTables; tableCount++)
+        {
+            GenerateAttemptsCSV(tableCount, keyCounts);
+            GenerateAverageLookupCSV(tableCount, keyCounts);
+        }
+    }
+
+    static void SaveToCSV(string directory, string filename, string content)
+    {
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        File.WriteAllText(Path.Combine(directory, filename), content);
+    }
+
+    static void GenerateAttemptsCSV(int tableCount, List<int> keyCounts)
+    {
         Dictionary<int, List<int>> results = new Dictionary<int, List<int>>();
 
         foreach (var keyCount in keyCounts)
         {
-            Container container = new Container(2, keyCount);
+            Container container = new Container(tableCount, keyCount);
             List<int> attempts = new List<int>();
 
             for (int i = 0; i < keyCount; i++)
@@ -33,61 +53,36 @@ class Program
             results[keyCount] = attempts;
         }
 
-        // We could use Oxyplot to directly plot it in C#, but we could also use Excel or Python
-        string csvFile = "attempts.csv";
-        using (StreamWriter writer = new StreamWriter(csvFile))
+        string csvContent = "KeyCount,Attempts\n";
+        foreach (var entry in results)
         {
-            writer.WriteLine("KeyCount,Attempts");
-            foreach (var entry in results)
-            {
-                writer.WriteLine($"{entry.Key},{string.Join("|", entry.Value)}");
-            }
+            csvContent += $"{entry.Key},{string.Join("|", entry.Value)}\n";
         }
 
-        List<int> keyCounts2 = new List<int> { 1000, 5000, 10000, 20000, 50000, 100000 };
-        Dictionary<int, double> results2 = new Dictionary<int, double>();
-        foreach(var keyCount in keyCounts2)
+        SaveToCSV("CSV_Files", $"attempts_{tableCount}tables.csv", csvContent);
+    }
+
+    static void GenerateAverageLookupCSV(int tableCount, List<int> keyCounts)
+    {
+        Dictionary<int, double> results = new Dictionary<int, double>();
+
+        foreach (var keyCount in keyCounts)
         {
-            Container container = new Container(2, keyCount);
+            Container container = new Container(tableCount, keyCount);
             for (int i = 0; i < keyCount; i++)
             {
                 container.Insert(i);
             }
-            results2[keyCount] = container.AvgLookUpTime();
+
+            results[keyCount] = container.AvgLookUpTime();
         }
 
-        // Let's do some analytical testing to check for any empirical correlations between m(Number of Keys) and AverageLookup
-        string averageLookupFile = "averageLookup2Tables.csv";
-        using (StreamWriter writer = new StreamWriter(averageLookupFile))
+        string csvContent = "KeyCount,AverageLookup\n";
+        foreach (var entry in results)
         {
-            writer.WriteLine("KeyCount,AverageLookup");
-            foreach (var entry in results2)
-            {
-                writer.WriteLine($"{entry.Key},{entry.Value}");
-            }
+            csvContent += $"{entry.Key},{entry.Value}\n";
         }
 
-         List<int> keyCounts3 = new List<int> { 1000, 5000, 10000, 20000, 50000, 100000 };
-        Dictionary<int, double> results3 = new Dictionary<int, double>();
-        foreach(var keyCount in keyCounts3)
-        {
-            Container container = new Container(3, keyCount);
-            for (int i = 0; i < keyCount; i++)
-            {
-                container.Insert(i);
-            }
-            results2[keyCount] = container.AvgLookUpTime();
-        }
-
-        // Let's do some analytical testing to check for any empirical correlations between m(Number of Keys) and AverageLookup
-        string averageLookupFile2 = "averageLookup3Tables.csv";
-        using (StreamWriter writer = new StreamWriter(averageLookupFile2))
-        {
-            writer.WriteLine("KeyCount,AverageLookup");
-            foreach (var entry in results2)
-            {
-                writer.WriteLine($"{entry.Key},{entry.Value}");
-            }
-        }
+        SaveToCSV("CSV_Files", $"averageLookup_{tableCount}tables.csv", csvContent);
     }
 }
