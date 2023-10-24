@@ -3,4 +3,4 @@ obj/
 BenchmarkDotNet.Artifacts/
 attempts.csv
 Plots/
-CSV_FILES/
+CSV_Files/

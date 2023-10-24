@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import os
 
 def generate_plot(csv_filename, table_count, expected_values):
+    if not os.path.exists("Plots"):
+        os.makedirs("Plots")
     # Clear content before creating a new plot
     plt.clf()
     # Read the CSV file
@@ -19,8 +22,7 @@ def generate_plot(csv_filename, table_count, expected_values):
     plt.grid()
     plt.legend()
     plt.savefig(f"Plots/AverageLookup{table_count}Tables")
-    plt.show()
-
+    
     dist = np.linalg.norm(np.array(Y) - np.array(expected_values))
     print(dist)
 
@@ -36,5 +38,5 @@ expected_values_dict = {
     10: [5.5, 5.5, 5.5, 5.5, 5.5, 5.5]
 }
 for table_count, expected_values in expected_values_dict.items():
-    csv_filename = f'CSV_Files/averageLookup_{table_count}Tables.csv'
+    csv_filename = f'CSV_Files/AverageLookupAttempts/averageLookup_{table_count}tables.csv'
     generate_plot(csv_filename, table_count, expected_values)
