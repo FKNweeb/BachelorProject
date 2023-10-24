@@ -11,6 +11,10 @@ class Program
 {
     static void Main(string[] args)
     {
+        // BenchMarks Run First
+        var config = BenchmarkDotNet.Configs.DefaultConfig.Instance.WithOptions(ConfigOptions.DisableOptimizationsValidator);
+        BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
+
         // Range of table tests
         int minTables = 2;
         int maxTables = 10;
@@ -25,14 +29,16 @@ class Program
         }
     }
 
-    static void SaveToCSV(string directory, string filename, string content)
+    static void SaveToCSV(string directory1, string directory2, string filename, string content)
     {
-        if (!Directory.Exists(directory))
+        string fullPath = Path.Combine(directory1, directory2);
+        
+        if (!Directory.Exists(fullPath))
         {
-            Directory.CreateDirectory(directory);
+            Directory.CreateDirectory(fullPath);
         }
-
-        File.WriteAllText(Path.Combine(directory, filename), content);
+        
+        File.WriteAllText(Path.Combine(fullPath, filename), content);
     }
 
     static void GenerateAttemptsCSV(int tableCount, List<int> keyCounts)
@@ -59,7 +65,7 @@ class Program
             csvContent += $"{entry.Key},{string.Join("|", entry.Value)}\n";
         }
 
-        SaveToCSV("CSV_Files", $"attempts_{tableCount}tables.csv", csvContent);
+        SaveToCSV("CSV_Files", "KeyAttempts", $"KeyAttempts_{tableCount}Tables.csv", csvContent);
     }
 
     static void GenerateAverageLookupCSV(int tableCount, List<int> keyCounts)
@@ -83,6 +89,6 @@ class Program
             csvContent += $"{entry.Key},{entry.Value}\n";
         }
 
-        SaveToCSV("CSV_Files", $"averageLookup_{tableCount}tables.csv", csvContent);
+        SaveToCSV("CSV_Files", "AverageLookupAttempts", $"averageLookup_{tableCount}tables.csv", csvContent);
     }
 }
