@@ -12,7 +12,7 @@ def generate_plot(csv_filename):
     data = pd.read_csv(csv_filename)
 
     X = data['HowFilled'].tolist()
-    Y = data['AverageLookup'].tolist()
+    Y = data['AverageLookUp'].tolist()
 
     plt.scatter(X, Y, label=f"How filled the table is VS AverageLookup")
     plt.xlabel('How filled the table is')
@@ -20,8 +20,10 @@ def generate_plot(csv_filename):
     plt.title(f"How filled the table is VS AverageLookup for 3 generic tables")
     plt.grid()
     plt.legend()
+    plt.show()
     plt.savefig(f"Plots/Generic3TablesHowFilled")
 
 
-csv_filename = f'CSV_Files/Generic_3tablesHowFilled.csv'
+csv_filename = f'CSV_Files/HowFilled/GenericHowFilled_3tables.csv'
 generate_plot(csv_filename)
+
