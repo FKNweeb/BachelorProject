@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using BenchMarker;
 using CuckooHashTable;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic.FileIO;
 
 class Program
 {
@@ -23,20 +24,21 @@ class Program
             GenerateAverageLookupCSV(tableCount, keyCounts);
         }*/
         // Generate3TablesAverageLookup(keyCounts);
-        var watch = new System.Diagnostics.Stopwatch();
-        watch.Start();
-        GenerateTablesHowFilled(keyCounts, 2);
-        GenerateTablesHowFilled(keyCounts, 3);
-        GenerateTablesHowFilled(keyCounts, 4);
-        GenerateTablesHowFilled(keyCounts, 5);
-        GenerateTablesHowFilled(keyCounts, 6);
-        GenerateTablesHowFilled(keyCounts, 7);
-        GenerateTablesHowFilled(keyCounts, 8);
-        GenerateTablesHowFilled(keyCounts, 9);
-        GenerateTablesHowFilled(keyCounts, 10);
-        watch.Stop();
-        TimeSpan timeSpan = watch.Elapsed;
-        Console.WriteLine($"Time: {timeSpan.Hours}h {timeSpan.Minutes}m {timeSpan.Seconds}s");
+        // GenerateTablesHowFilled(keyCounts, 2);
+        // GenerateTablesHowFilled(keyCounts, 3);
+        // GenerateTablesHowFilled(keyCounts, 4);
+        // GenerateTablesHowFilled(keyCounts, 5);
+        // GenerateTablesHowFilled(keyCounts, 6);
+        // GenerateTablesHowFilled(keyCounts, 7);
+        // GenerateTablesHowFilled(keyCounts, 8);
+        // GenerateTablesHowFilled(keyCounts, 9);
+        // GenerateTablesHowFilled(keyCounts, 10);
+        
+        string csvFilePath = "Csv_Files/Pareto/GenericParetoData_2tables.csv";
+        string[] selectedHeaders = { "TableSize1", "TableSize2" };
+        List<int[]> selectedLines = ReadCsvFile(csvFilePath, selectedHeaders);
+
+        GenerateAroundParetoValue(selectedLines);
     }
 
     static void SaveToCSV(string directory1, string directory2, string filename, string content)
@@ -218,5 +220,106 @@ class Program
         }
 
         SaveToCSV("CSV_Files", "HowFilled", $"GenericHowFilled_{numOfTables}tables.csv", csvContent);
+    }
+
+
+    static void GenerateAroundParetoValue(List<int[]> lists){
+
+        List<List<int>> outputList = new List<List<int>>();
+        var rand = new Random();
+
+        foreach (var item in lists)
+        {
+  
+            int numberOfSubLists = 10;
+
+            for (int i = 0; i < numberOfSubLists; i++)
+            {   
+                List<int> point = new List<int>();
+                for (int j = 0; j < item.Length; j++)
+                {
+                    point.Add(rand.Next(item[j] - (int)(item[j] * 0.1), item[j] + (int)(item[j] * 0.1)));
+                } 
+                outputList.Add(point);
+            }
+        }
+
+        string csvContent = "AverageLookUp,HowFilled";
+        for (int i = 1; i <= lists[0].Length; i++)
+        {
+            csvContent += $",TableSize{i}";
+        }
+        csvContent += "\n";
+        
+        foreach (var list in outputList)
+        {
+            list.Sort();
+            list.Reverse();
+            
+            GenericContainer container = new GenericContainer(list.Count, list);
+            for (int i = 0; i < list[0] * 2; i++)
+            {
+                if(!container.Insert(i)) { break; }
+            }
+            csvContent += $"{container.AvgLookUpTime()},{container.HowFilled()}";
+            foreach(var val in list)
+            {
+                csvContent += $",{val}";
+            }
+            csvContent += "\n";
+        }
+
+        SaveToCSV("CSV_Files", "Pareto", $"GenericParetoHowFilled_{lists[0].Length}tables.csv", csvContent);
+    }
+
+    static List<int[]> ReadCsvFile(string filePath, string[] selectedHeaders)
+    {
+        List<int[]> selectedLines = new List<int[]>();
+
+        using (TextFieldParser parser = new TextFieldParser(filePath))
+        {
+            parser.TextFieldType = FieldType.Delimited;
+            parser.SetDelimiters(",");
+
+            // Read the headers
+            string[] headers = parser.ReadFields();
+
+            // Find the indices of the selected headers
+            Dictionary<string, int> headerIndices = new Dictionary<string, int>();
+            for (int i = 0; i < headers.Length; i++)
+            {
+                headerIndices[headers[i]] = i;
+            }
+
+            // Continue reading the file
+            while (!parser.EndOfData)
+            {
+                string[] fields = parser.ReadFields();
+
+                // Filter lines based on selected headers
+                bool includeLine = true;
+                foreach (string selectedHeader in selectedHeaders)
+                {
+                    if (!headerIndices.ContainsKey(selectedHeader))
+                    {
+                        Console.WriteLine($"Header '{selectedHeader}' not found in the file.");
+                        includeLine = false;
+                        break;
+                    }
+                }
+
+                if (includeLine)
+                {
+                    int[] intFields = new int[fields.Length - 2];
+                    for (int i = 0; i < fields.Length - 2; i++)
+                    {
+                        intFields[i] = int.Parse(fields[i+2]);
+                    }
+                    selectedLines.Add(intFields);
+                }                      
+            }
+        }
+
+        return selectedLines;
     }
 }
