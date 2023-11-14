@@ -219,23 +219,4 @@ class Program
 
         SaveToCSV("CSV_Files", "HowFilled", $"GenericHowFilled_{numOfTables}tables.csv", csvContent);
     }
-
-    // We wanna open the file, read it, compare points to each other and remove them based on something and write it to another csv file
-    static void GenerateParetoCurve(string filename) {
-        FileStream fileStream = new FileStream(
-            filename, FileMode.OpenOrCreate,
-            FileAccess.ReadWrite, FileShare.None);
-
-        // this will read all lines from within the File
-        // and automatically put them into an array
-        //
-        var fileLines = File.ReadLines(filename);
-        // iterate through each element within the array and
-        // read it
-        //
-        foreach (var lines in fileLines)
-        {
-            Console.ReadLine();
-        }
-    }
 }

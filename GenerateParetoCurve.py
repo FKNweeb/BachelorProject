@@ -68,7 +68,7 @@ def generate_plot(csv_filename, table_count):
     plt.show()
     plt.close(fig)
 
-# Define table range
+# Define table range 
 start_table_count = 2
 end_table_count = 10
 

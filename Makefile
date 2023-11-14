@@ -16,4 +16,4 @@ benchmark:
 	dotnet clean tests/
 	dotnet build BenchMarkCuckoo/BenchMarkCuckoo.csproj /p:Platform=x64
 	dotnet build BachelorProject.csproj /p:Platform=x64
-	dotnet run --project BachelorProject.csproj /p:Platform=x64
+	dotnet run --project BachelorProject.csproj /p:Platform=x64 
