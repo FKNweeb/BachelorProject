@@ -26,6 +26,9 @@ namespace CuckooHashTable {
             _tables = new HashTable[numTables];
             for (int i = 0; i < numTables; i++)
             {
+                if (sizes[i] <= 0) {
+                    throw new ArgumentException($"Table size must be greater than 0, but got {sizes[i]} for table {i}.");
+                }
                 _tables[i] = new HashTable(sizes[i]);
             }
         }
@@ -42,6 +45,9 @@ namespace CuckooHashTable {
                 int chosenTable = GetRandomTable();
                 var randomTable = _tables[chosenTable];
                 int pos = _keyDictionary[key][chosenTable];
+                if (pos < 0 || pos >= randomTable._table.Length) {
+                    throw new Exception($"Invalid position: {pos} for table size {randomTable._table.Length}");
+                }
                 // Stop condition
                 if(randomTable._table[pos] == 0) {
                     randomTable._table[pos] = key;
