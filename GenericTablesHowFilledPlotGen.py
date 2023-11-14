@@ -32,11 +32,11 @@ def generate_plot(csv_filename, table_count):
     plot_filename = os.path.join(plot_dir, f'GenericHowFilled_{table_count}_Tables.png')
     plt.savefig(plot_filename)
     plt.show()
-    plt.close(fig)  # Close the figure after saving to free up memory
+    plt.close(fig)
 
 
-start_table_count = 2  # Start with 2 tables
-end_table_count = 10   # End with 10 tables
+start_table_count = 2
+end_table_count = 10
 
 for i in range(start_table_count, end_table_count + 1):
     csv_filename = f'CSV_Files/HowFilled/GenericHowFilled_{i}tables.csv'
