@@ -11,34 +11,40 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Range of table tests
-        int minTables = 2;
-        int maxTables = 10;
-
         // Key List
-        List<int> keyCounts = new List<int> { 1000, 5000, 10000, 20000, 50000, 100000 };
+        int[] keyCounts = { 1000, 5000, 10000, 20000, 50000, 100000 };
 
-        /*for (int tableCount = minTables; tableCount <= maxTables; tableCount++)
+        // foreach (var keyCount in keyCounts)
+        // {
+        //      for (int i = 2; i <= 10; i++)
+        //      {
+        //         //GenerateAttemptsCSV(i, keyCount);
+        //         //GenerateAverageLookupCSV(i, keyCount);
+        //         //GenerateTablesHowFilled(keyCount, i);
+        //     }
+        // }
+        var selectedHeadersDic = new Dictionary<int, string[]>();
+        selectedHeadersDic.Add(2, new string[] {"TableSize1", "TableSize2"});
+        selectedHeadersDic.Add(3, new string[] {"TableSize1", "TableSize2", "TableSize3"});
+        selectedHeadersDic.Add(4, new string[] {"TableSize1", "TableSize2", "TableSize3", "TableSize4"});
+        selectedHeadersDic.Add(5, new string[] {"TableSize1", "TableSize2", "TableSize3", "TableSize4", "TableSize5"});
+        selectedHeadersDic.Add(6, new string[] {"TableSize1", "TableSize2", "TableSize3", "TableSize4", "TableSize5", "TableSize6"});
+        selectedHeadersDic.Add(7, new string[] {"TableSize1", "TableSize2", "TableSize3", "TableSize4", "TableSize5", "TableSize6", "TableSize7"});
+        selectedHeadersDic.Add(8, new string[] {"TableSize1", "TableSize2", "TableSize3", "TableSize4", "TableSize5", "TableSize6", "TableSize7", "TableSize8"});
+        selectedHeadersDic.Add(9, new string[] {"TableSize1", "TableSize2", "TableSize3", "TableSize4", "TableSize5", "TableSize6", "TableSize7", "TableSize8", "TableSize9"});
+        selectedHeadersDic.Add(10, new string[] {"TableSize1", "TableSize2", "TableSize3", "TableSize4", "TableSize5", "TableSize6", "TableSize7", "TableSize8", "TableSize9", "TableSize10"});
+
+        foreach (var keyCount in keyCounts)
         {
-            GenerateAttemptsCSV(tableCount, keyCounts);
-            GenerateAverageLookupCSV(tableCount, keyCounts);
-        }*/
-        // Generate3TablesAverageLookup(keyCounts);
-        // GenerateTablesHowFilled(keyCounts, 2);
-        // GenerateTablesHowFilled(keyCounts, 3);
-        // GenerateTablesHowFilled(keyCounts, 4);
-        // GenerateTablesHowFilled(keyCounts, 5);
-        // GenerateTablesHowFilled(keyCounts, 6);
-        // GenerateTablesHowFilled(keyCounts, 7);
-        // GenerateTablesHowFilled(keyCounts, 8);
-        // GenerateTablesHowFilled(keyCounts, 9);
-        // GenerateTablesHowFilled(keyCounts, 10);
-        
-        string csvFilePath = "Csv_Files/Pareto/GenericParetoData_2tables.csv";
-        string[] selectedHeaders = { "TableSize1", "TableSize2" };
-        List<int[]> selectedLines = ReadCsvFile(csvFilePath, selectedHeaders);
+            for (int i = 2; i < 11; i++)
+            {
+                string csvFilePath = $"CSV_Files/HowFilled/Pareto/GenericParetoData{keyCount}_{i}tables.csv";
+                List<int[]> selectedLines = ReadCsvFile(csvFilePath, selectedHeadersDic[i]);
 
-        GenerateAroundParetoValue(selectedLines);
+                GenerateAroundParetoValue(selectedLines);
+                ReduceNoiseHowFilled(selectedLines);
+            }
+        }
     }
 
     static void SaveToCSV(string directory1, string directory2, string filename, string content)
@@ -52,22 +58,20 @@ class Program
         File.WriteAllText(Path.Combine(FullPath, filename), content);
     }
 
-    static void GenerateAttemptsCSV(int tableCount, List<int> keyCounts)
+    static void GenerateAttemptsCSV(int tableCount, int keyCount)
     {
         Dictionary<int, List<int>> results = new Dictionary<int, List<int>>();
 
-        foreach (var keyCount in keyCounts)
-        {
-            Container container = new Container(tableCount, keyCount);
-            List<int> attempts = new List<int>();
+        Container container = new Container(tableCount, keyCount);
+        List<int> attempts = new List<int>();
 
-            for (int i = 0; i < keyCount * tableCount; i++)
-            {
-                container.Insert(i);
-                attempts.Add(container.LastAttemptCount);
-            }
-            results[keyCount] = attempts;
+        for (int i = 0; i < keyCount * tableCount; i++)
+        {
+            attempts.Add(container.LastAttemptCount);
+            if(!container.Insert(i)) { break; }
+            
         }
+        results[keyCount] = attempts;
 
         string csvContent = "KeyCount,Attempts\n";
         foreach (var entry in results)
@@ -75,23 +79,19 @@ class Program
             csvContent += $"{entry.Key},{string.Join("|", entry.Value)}\n";
         }
 
-        // SaveToCSV("CSV_Files", $"attempts_{tableCount}tables.csv", csvContent);
+        SaveToCSV("CSV_Files", "Attempts", $"attempts{keyCount}_{tableCount}tables.csv", csvContent);
     }
 
-    static void GenerateAverageLookupCSV(int tableCount, List<int> keyCounts)
+    static void GenerateAverageLookupCSV(int tableCount, int keyCount)
     {
         Dictionary<int, double> results = new Dictionary<int, double>();
-
-        foreach (var keyCount in keyCounts)
+        Container container = new Container(tableCount, keyCount);
+        for (int i = 0; i < keyCount; i++)
         {
-            Container container = new Container(tableCount, keyCount);
-            for (int i = 0; i < keyCount; i++)
-            {
-                container.Insert(i);
-            }
-
-            results[keyCount] = container.AvgLookUpTime();
+            if(!container.Insert(i)) { break; }
         }
+
+        results[keyCount] = container.AvgLookUpTime();
 
         string csvContent = "KeyCount,AverageLookup\n";
         foreach (var entry in results)
@@ -99,98 +99,44 @@ class Program
             csvContent += $"{entry.Key},{entry.Value}\n";
         }
 
-        // SaveToCSV("CSV_Files", $"averageLookup_{tableCount}tables.csv", csvContent);
+        SaveToCSV("CSV_Files", "AverageLookUp", $"averageLookup{keyCount}_{tableCount}tables.csv", csvContent);
     }
 
-    static void Generate3TablesAverageLookup(List<int> keyCounts) {
+    static void GenerateTablesHowFilled(int keyCount, int numOfTables) {
         List<List<int>> lists = new List<List<int>>();
-        foreach (var keyCount in keyCounts)
+        int totalSum = keyCount * 2;
+        int numberOfSubLists = 100;
+        List<int> firstList = new List<int>();
+        for (int i = 0; i < numOfTables; i++)
         {
-            for (int j = 0; j < keyCount/2; j += keyCount / 16)
-            {
-                lists.Add(new List<int>{keyCount, keyCount - (keyCount/2) + j, keyCount - (keyCount / 2) - j});
-            }
+            firstList.Add(totalSum / numOfTables);
         }
+        lists.Add(firstList);
+        for (int i = 0; i < numberOfSubLists; i++)
+        {
+            List<int> subList = new List<int>();
+            int remainingSum = totalSum;
 
-        string csvContent = "KeyCount,AverageLookup,TableSize1,TableSize2,TableSize3\n";
+            for (int j = 0; j < numOfTables - 1; j++)
+            {
+                if (remainingSum - numOfTables <= 0) { subList.Clear(); break; }
+                int randomValue = new Random().Next(remainingSum - numOfTables);
+                if (randomValue == 0) { randomValue = 1; }
+                subList.Add(randomValue);
+                remainingSum -= randomValue;
+            }
+            if (remainingSum == 0 || subList.Count() < numOfTables - 1) { subList.Clear(); continue; }
+            subList.Add(remainingSum);
+            lists.Add(subList);
+        }
+        List<int> lastList = new List<int>();
+        lastList.Add(totalSum - (numOfTables - 1) * 100);
+        for (int i = 0; i < numOfTables-1; i++)
+        {
+            lastList.Add(100);
+        }
+        lists.Add(lastList);
         
-        foreach (var list in lists)
-        {
-            GenericContainer container = new GenericContainer(3, list);
-            for (int i = 0; i < list[0] * 2; i++)
-            {
-                container.Insert(i);
-            }
-            csvContent += $"{list[0]},{container.AvgLookUpTime()},{list[0]},{list[1]},{list[2]}\n";
-        }
-
-
-        // SaveToCSV("CSV_Files", $"Generic_3tables.csv", csvContent);
-    }
-
-    // static void Generate3TablesHowFilled(List<int> keyCounts) {
-    //     List<List<int>> lists = new List<List<int>>();
-    //     foreach (var keyCount in keyCounts)
-    //     {
-    //         for (int j = 0; j < keyCount/2; j += keyCount / 16)
-    //         {
-    //             lists.Add(new List<int>{keyCount, keyCount - (keyCount/2) + j, keyCount - (keyCount / 2) - j});
-    //         }
-    //     }
-
-    //     string csvContent = "AverageLookup,HowFilled\n";
-        
-    //     foreach (var list in lists)
-    //     {
-    //         GenericContainer container = new GenericContainer(3, list);
-    //         for (int i = 0; i < list[0] * 2; i++)
-    //         {
-    //             container.Insert(i);
-    //         }
-    //         csvContent += $"{container.AvgLookUpTime()},{container.HowFilled()}\n";
-    //     }
-
-
-    //     SaveToCSV("CSV_Files", $"Generic_3tablesHowFilled.csv", csvContent);
-    // }
-
-    static void GenerateTablesHowFilled(List<int> keyCounts, int numOfTables) {
-        List<List<int>> lists = new List<List<int>>();
-        foreach (var keyCount in keyCounts)
-        {
-            int totalSum = keyCount * 2;
-            int numberOfSubLists = 100;
-            List<int> firstList = new List<int>();
-            for (int i = 0; i < numOfTables; i++)
-            {
-                firstList.Add(totalSum / numOfTables);
-            }
-            lists.Add(firstList);
-            for (int i = 0; i < numberOfSubLists; i++)
-            {
-                List<int> subList = new List<int>();
-                int remainingSum = totalSum;
-
-                for (int j = 0; j < numOfTables - 1; j++)
-                {
-                    if (remainingSum - numOfTables <= 0) { subList.Clear(); break; }
-                    int randomValue = new Random().Next(remainingSum - numOfTables);
-                    if (randomValue == 0) { randomValue = 1; }
-                    subList.Add(randomValue);
-                    remainingSum -= randomValue;
-                }
-                if (remainingSum == 0 || subList.Count() < numOfTables - 1) { subList.Clear(); continue; }
-                subList.Add(remainingSum);
-                lists.Add(subList);
-            }
-            List<int> lastList = new List<int>();
-            lastList.Add(totalSum - (numOfTables - 1) * 100);
-            for (int i = 0; i < numOfTables-1; i++)
-            {
-                lastList.Add(100);
-            }
-            lists.Add(lastList);
-        }
 
         string csvContent = "AverageLookUp,HowFilled";
         for (int i = 1; i <= numOfTables; i++)
@@ -199,7 +145,6 @@ class Program
         }
         csvContent += "\n";
         
-        int counter = 1;
         foreach (var list in lists)
         {
             list.Sort();
@@ -215,11 +160,9 @@ class Program
                 csvContent += $",{val}";
             }
             csvContent += "\n";
-            Console.WriteLine($"List number: {counter} out of {lists.Count} generating {numOfTables} tables");
-            counter++;
         }
 
-        SaveToCSV("CSV_Files", "HowFilled", $"GenericHowFilled_{numOfTables}tables.csv", csvContent);
+        SaveToCSV("CSV_Files", "HowFilled", $"GenericHowFilled{keyCount}_{numOfTables}tables.csv", csvContent);
     }
 
 
@@ -230,9 +173,7 @@ class Program
 
         foreach (var item in lists)
         {
-  
             int numberOfSubLists = 10;
-
             for (int i = 0; i < numberOfSubLists; i++)
             {   
                 List<int> point = new List<int>();
@@ -269,7 +210,7 @@ class Program
             csvContent += "\n";
         }
 
-        SaveToCSV("CSV_Files", "Pareto", $"GenericParetoHowFilled_{lists[0].Length}tables.csv", csvContent);
+        SaveToCSV("CSV_Files", "Pareto", $"GenericParetoHowFilled{lists[0].Sum()/2}_{lists[0].Length}tables.csv", csvContent);
     }
 
     static List<int[]> ReadCsvFile(string filePath, string[] selectedHeaders)
@@ -321,5 +262,43 @@ class Program
         }
 
         return selectedLines;
+    }
+
+    // Virker kun når alle lister har samme længde
+    static void ReduceNoiseHowFilled(List<int[]> listOfParameters){
+        List<(double avgLookUp, double howFilled)> medians = new List<(double avgLookUp, double howFilled)>();
+        foreach (var parameters in listOfParameters)
+        {
+            List<(double avgLookUp, double howFilled)> results = new List<(double avgLookUp, double howFilled)>();
+            for (int i = 0; i < 11; i++)
+            {
+                GenericContainer container = new GenericContainer(parameters.Length, parameters.ToList());
+                for (int j = 0; j < parameters[0] * 2; j++)
+                {
+                    if(!container.Insert(j)) { break; }
+                }
+                results.Add((container.AvgLookUpTime(), container.HowFilled()));
+            }
+            results.OrderBy(x => x.howFilled).ToList();
+            medians.Add(results[5]);
+        }
+        string csvContent = "AverageLookUp,HowFilled";
+        for (int i = 1; i <= listOfParameters[0].Length; i++)
+        {
+            csvContent += $",TableSize{i}";
+        }
+        csvContent += "\n";
+
+        foreach (var pair in medians)
+        {
+            csvContent += $"{pair.avgLookUp},{pair.howFilled}";
+            foreach(var val in listOfParameters[medians.IndexOf(pair)])
+            {
+                csvContent += $",{val}";
+            }
+            csvContent += "\n";
+        }
+
+        SaveToCSV("CSV_Files", "Median", $"GenericHowFilledReducedNoise{listOfParameters[0].Sum()/2}_{listOfParameters[0].Length}tables.csv", csvContent);
     }
 }

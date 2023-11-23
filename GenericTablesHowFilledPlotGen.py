@@ -5,7 +5,7 @@ import mplcursors
 import os
 
 
-def generate_plot(csv_filename, table_count):
+def generate_plot(csv_filename, table_count, keyCount):
     data = pd.read_csv(csv_filename)
 
     X = data['HowFilled'].tolist()
@@ -18,9 +18,9 @@ def generate_plot(csv_filename, table_count):
     labels = [''.join(f"table size {i+1}: {size},\n" for i, size in enumerate(sizes)) for sizes in zip(*table_sizes)]
     mplcursors.cursor(hover=True).connect("add", lambda sel: sel.annotation.set_text(labels[sel.index]))
 
-    ax.set_xlabel('How Filled')
+    ax.set_xlabel('LoadFactor')
     ax.set_ylabel('Average Lookup Time')
-    ax.set_title(f"Average Lookup Time vs How Filled for {table_count} Tables")
+    ax.set_title(f"Average Lookup Time vs LoadFactor for {table_count} Tables, {keyCount} KeyCount")
     ax.grid(True)
     ax.legend()
 
@@ -29,15 +29,16 @@ def generate_plot(csv_filename, table_count):
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    plot_filename = os.path.join(plot_dir, f'GenericHowFilled_{table_count}_Tables.png')
+    plot_filename = os.path.join(plot_dir, f'GenericLoadFactor{keyCount}_{table_count}_Tables.png')
     plt.savefig(plot_filename)
-    plt.show()
     plt.close(fig)
 
 
 start_table_count = 2
 end_table_count = 10
+keyCount = [1000, 5000, 10000, 20000, 50000, 100000]
 
 for i in range(start_table_count, end_table_count + 1):
-    csv_filename = f'CSV_Files/HowFilled/GenericHowFilled_{i}tables.csv'
-    generate_plot(csv_filename, i)
+    for j in keyCount:
+        csv_filename = f'CSV_Files/HowFilled/GenericHowFilled{j}_{i}tables.csv'
+        generate_plot(csv_filename, i, j)
