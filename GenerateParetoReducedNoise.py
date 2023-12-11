@@ -10,9 +10,9 @@ def generate_pareto_curve(csv_file_path, output_csv_file_path, tableCount, keyCo
     if not os.path.exists("CSV_Files"):
         os.makedirs("CSV_Files")
     if not os.path.exists("CSV_Files/LoadFactor"):
-        os.makedirs("CSV_Files/LoadFactor")
-    if not os.path.exists("CSV_Files/LoadFactor/Pareto"):
-        os.makedirs("CSV_Files/LoadFactor/Pareto")
+        os.makedirs("CSV_Files/ReduceNoise")
+    if not os.path.exists("CSV_Files/ReduceNoise/Pareto"):
+        os.makedirs("CSV_Files/ReduceNoise/Pareto")
     
     data = pd.read_csv(csv_file_path)
 
@@ -38,11 +38,6 @@ def generate_pareto_curve(csv_file_path, output_csv_file_path, tableCount, keyCo
     pareto_df.to_csv(output_csv_file_path, index=False)
 
 def generate_plot(csv_filename, table_count, keyCount):
-    plot_dir = 'Plots'
-    pareto_dir = os.path.join(plot_dir, 'Pareto')
-
-    if not os.path.exists(pareto_dir):
-        os.makedirs(pareto_dir)
     data = pd.read_csv(csv_filename)
 
     X = data['LoadFactor'].tolist()
@@ -58,18 +53,18 @@ def generate_plot(csv_filename, table_count, keyCount):
 
     ax.set_xlabel('Load Factor')
     ax.set_ylabel('Average Lookup Time')
-    ax.set_title(f"Average Lookup Time vs Load Factor for {table_count} Tables, {keyCount} KeyCount")
+    ax.set_title(f"Average Lookup Time vs Load Factor for {table_count} Tables, {keyCount * 2} (key) slots")
     ax.grid(True)
     ax.legend()
 
     # Ensure the Plots directory exists
     plot_dir = 'Plots'
-    load_dir = 'LoadFactor'
-    pareto_dir = os.path.join(plot_dir, load_dir, 'Pareto')
+    load_dir = 'ReduceNoise'
+    pareto_dir = os.path.join(plot_dir, load_dir, 'Plots/ReduceNoise/Pareto')
     if not os.path.exists(pareto_dir):
         os.makedirs(pareto_dir)
 
-    plot_filename = os.path.join(pareto_dir, f'GenericLoadFactor{keyCount}_{table_count}_Tables.png')
+    plot_filename = os.path.join(pareto_dir, f'GenericLoadFactor{keyCount}_{table_count}Tables.png')
     plt.savefig(plot_filename)
     plt.close(fig)
 
@@ -81,11 +76,11 @@ keyCount = [1000, 5000, 10000, 20000, 50000, 100000]
 
 for i in range(start_table_count, end_table_count + 1):
     for j in keyCount:
-        csv_filename = f'CSV_Files/LoadFactor/GenericLoadFactor{j}_{i}tables.csv'
-        csv_File_Out = f'CSV_Files/LoadFactor/Pareto/GenericParetoData{j}_{i}tables.csv'
+        csv_filename = f'CSV_Files/ReduceNoise/GenericLoadFactorReducedNoise{j}_{i}tables.csv'
+        csv_File_Out = f'CSV_Files/ReduceNoise/Pareto/GenericParetoLoadFactorReducedNoise{j}_{i}tables.csv'
         generate_pareto_curve(csv_filename, csv_File_Out, i, j)
 
 for i in range(start_table_count, end_table_count + 1):
     for j in keyCount:
-        csv_file = f'CSV_Files/LoadFactor/Pareto/GenericParetoData{j}_{i}tables.csv'
+        csv_file = f'CSV_Files/ReduceNoise/Pareto/GenericParetoLoadFactorReducedNoise{j}_{i}tables.csv'
         generate_plot(csv_file, i, j)

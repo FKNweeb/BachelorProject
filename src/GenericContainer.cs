@@ -87,7 +87,7 @@ namespace CuckooHashTable {
             return false;
         }
 
-        public double HowFilled() {
+        public double LoadFactor() {
             int storage = 0;
 
             for (int i = 0; i < _numTables; i++)

@@ -42,7 +42,7 @@ public class TestContainer
         // Assert
         Assert.True(cuckooTable.Contains(100));
         Assert.False(cuckooTable.Contains(50001));
-        Assert.GreaterOrEqual(cuckooTable.HowFilled(), 0.48);
+        Assert.GreaterOrEqual(cuckooTable.LoadFactor(), 0.48);
     }
 
     [Test]
