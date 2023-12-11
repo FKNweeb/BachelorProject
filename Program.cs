@@ -18,9 +18,9 @@ class Program
         // {
         //      for (int i = 2; i <= 10; i++)
         //      {
-        //         //GenerateAttemptsCSV(i, keyCount);
-        //         //GenerateAverageLookupCSV(i, keyCount);
-        //         //GenerateTablesHowFilled(keyCount, i);
+        //         GenerateAttemptsCSV(i, keyCount);
+        //         GenerateAverageLookupCSV(i, keyCount);
+        //         GenerateTablesLoadFactor(keyCount, i);
         //     }
         // }
         var selectedHeadersDic = new Dictionary<int, string[]>();
@@ -38,11 +38,11 @@ class Program
         {
             for (int i = 2; i < 11; i++)
             {
-                string csvFilePath = $"CSV_Files/HowFilled/Pareto/GenericParetoData{keyCount}_{i}tables.csv";
+                string csvFilePath = $"CSV_Files/LoadFactor/Pareto/GenericParetoData{keyCount}_{i}tables.csv";
                 List<int[]> selectedLines = ReadCsvFile(csvFilePath, selectedHeadersDic[i]);
 
-                GenerateAroundParetoValue(selectedLines);
-                ReduceNoiseHowFilled(selectedLines);
+                GenerateVariance(selectedLines);
+                ReduceNoiseLoadFactor(selectedLines);
             }
         }
     }
@@ -79,7 +79,7 @@ class Program
             csvContent += $"{entry.Key},{string.Join("|", entry.Value)}\n";
         }
 
-        SaveToCSV("CSV_Files", "Attempts", $"attempts{keyCount}_{tableCount}tables.csv", csvContent);
+        SaveToCSV("CSV_Files", "KeyAttempts", $"attempts{keyCount}_{tableCount}tables.csv", csvContent);
     }
 
     static void GenerateAverageLookupCSV(int tableCount, int keyCount)
@@ -102,7 +102,7 @@ class Program
         SaveToCSV("CSV_Files", "AverageLookUp", $"averageLookup{keyCount}_{tableCount}tables.csv", csvContent);
     }
 
-    static void GenerateTablesHowFilled(int keyCount, int numOfTables) {
+    static void GenerateTablesLoadFactor(int keyCount, int numOfTables) {
         List<List<int>> lists = new List<List<int>>();
         int totalSum = keyCount * 2;
         int numberOfSubLists = 100;
@@ -138,7 +138,7 @@ class Program
         lists.Add(lastList);
         
 
-        string csvContent = "AverageLookUp,HowFilled";
+        string csvContent = "AverageLookUp,LoadFactor";
         for (int i = 1; i <= numOfTables; i++)
         {
             csvContent += $",TableSize{i}";
@@ -154,7 +154,7 @@ class Program
             {
                 if(!container.Insert(i)) { break; }
             }
-            csvContent += $"{container.AvgLookUpTime()},{container.HowFilled()}";
+            csvContent += $"{container.AvgLookUpTime()},{container.LoadFactor()}";
             foreach(var val in list)
             {
                 csvContent += $",{val}";
@@ -162,11 +162,11 @@ class Program
             csvContent += "\n";
         }
 
-        SaveToCSV("CSV_Files", "HowFilled", $"GenericHowFilled{keyCount}_{numOfTables}tables.csv", csvContent);
+        SaveToCSV("CSV_Files", "LoadFactor", $"GenericLoadFactor{keyCount}_{numOfTables}tables.csv", csvContent);
     }
 
 
-    static void GenerateAroundParetoValue(List<int[]> lists){
+    static void GenerateVariance(List<int[]> lists){
 
         List<List<int>> outputList = new List<List<int>>();
         var rand = new Random();
@@ -185,7 +185,7 @@ class Program
             }
         }
 
-        string csvContent = "AverageLookUp,HowFilled";
+        string csvContent = "AverageLookUp,LoadFactor";
         for (int i = 1; i <= lists[0].Length; i++)
         {
             csvContent += $",TableSize{i}";
@@ -202,7 +202,7 @@ class Program
             {
                 if(!container.Insert(i)) { break; }
             }
-            csvContent += $"{container.AvgLookUpTime()},{container.HowFilled()}";
+            csvContent += $"{container.AvgLookUpTime()},{container.LoadFactor()}";
             foreach(var val in list)
             {
                 csvContent += $",{val}";
@@ -210,7 +210,7 @@ class Program
             csvContent += "\n";
         }
 
-        SaveToCSV("CSV_Files", "Pareto", $"GenericParetoHowFilled{lists[0].Sum()/2}_{lists[0].Length}tables.csv", csvContent);
+        SaveToCSV("CSV_Files", "WithVariance", $"GenericParetoLoadFactor{lists[0].Sum()/2}_{lists[0].Length}tables.csv", csvContent);
     }
 
     static List<int[]> ReadCsvFile(string filePath, string[] selectedHeaders)
@@ -265,11 +265,11 @@ class Program
     }
 
     // Virker kun når alle lister har samme længde
-    static void ReduceNoiseHowFilled(List<int[]> listOfParameters){
-        List<(double avgLookUp, double howFilled)> medians = new List<(double avgLookUp, double howFilled)>();
+    static void ReduceNoiseLoadFactor(List<int[]> listOfParameters){
+        List<(double avgLookUp, double LoadFactor)> medians = new List<(double avgLookUp, double LoadFactor)>();
         foreach (var parameters in listOfParameters)
         {
-            List<(double avgLookUp, double howFilled)> results = new List<(double avgLookUp, double howFilled)>();
+            List<(double avgLookUp, double LoadFactor)> results = new List<(double avgLookUp, double LoadFactor)>();
             for (int i = 0; i < 11; i++)
             {
                 GenericContainer container = new GenericContainer(parameters.Length, parameters.ToList());
@@ -277,12 +277,12 @@ class Program
                 {
                     if(!container.Insert(j)) { break; }
                 }
-                results.Add((container.AvgLookUpTime(), container.HowFilled()));
+                results.Add((container.AvgLookUpTime(), container.LoadFactor()));
             }
-            results.OrderBy(x => x.howFilled).ToList();
+            results.OrderBy(x => x.LoadFactor).ToList();
             medians.Add(results[5]);
         }
-        string csvContent = "AverageLookUp,HowFilled";
+        string csvContent = "AverageLookUp,LoadFactor";
         for (int i = 1; i <= listOfParameters[0].Length; i++)
         {
             csvContent += $",TableSize{i}";
@@ -291,7 +291,7 @@ class Program
 
         foreach (var pair in medians)
         {
-            csvContent += $"{pair.avgLookUp},{pair.howFilled}";
+            csvContent += $"{pair.avgLookUp},{pair.LoadFactor}";
             foreach(var val in listOfParameters[medians.IndexOf(pair)])
             {
                 csvContent += $",{val}";
@@ -299,6 +299,6 @@ class Program
             csvContent += "\n";
         }
 
-        SaveToCSV("CSV_Files", "Median", $"GenericHowFilledReducedNoise{listOfParameters[0].Sum()/2}_{listOfParameters[0].Length}tables.csv", csvContent);
+        SaveToCSV("CSV_Files", "ReduceNoise", $"GenericLoadFactorReducedNoise{listOfParameters[0].Sum()/2}_{listOfParameters[0].Length}tables.csv", csvContent);
     }
 }
