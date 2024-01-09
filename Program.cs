@@ -38,10 +38,10 @@ class Program
         {
             for (int i = 2; i < 11; i++)
             {
-                string csvFilePath = $"CSV_Files/LoadFactor/Pareto/GenericParetoData{keyCount}_{i}tables.csv";
+                string csvFilePath = $"CSV_Files/WithVariance/Pareto/GenericParetoWithVariance{keyCount}_{i}tables.csv";
                 List<int[]> selectedLines = ReadCsvFile(csvFilePath, selectedHeadersDic[i]);
 
-                GenerateVariance(selectedLines);
+                // GenerateVariance(selectedLines);
                 ReduceNoiseLoadFactor(selectedLines);
             }
         }

@@ -9,10 +9,10 @@ def generate_pareto_curve(csv_file_path, output_csv_file_path, tableCount, keyCo
         os.makedirs("Plots")
     if not os.path.exists("CSV_Files"):
         os.makedirs("CSV_Files")
-    if not os.path.exists("CSV_Files/LoadFactor"):
-        os.makedirs("CSV_Files/LoadFactor")
-    if not os.path.exists("CSV_Files/LoadFactor/Pareto"):
-        os.makedirs("CSV_Files/LoadFactor/Pareto")
+    if not os.path.exists("CSV_Files/WithVariance"):
+        os.makedirs("CSV_Files/WithVariance")
+    if not os.path.exists("CSV_Files/WithVariance/Pareto"):
+        os.makedirs("CSV_Files/WithVariance/Pareto")
     
     data = pd.read_csv(csv_file_path)
 
@@ -32,7 +32,7 @@ def generate_pareto_curve(csv_file_path, output_csv_file_path, tableCount, keyCo
     plt.scatter(pareto_df['LoadFactor'], pareto_df['AverageLookUp'], color='red', marker='o', label=f'Pareto Front for {tableCount} tables, {keyCount} KeyCount')
     plt.xlabel('LoadFactor')
     plt.ylabel('AverageLookUp')
-    plt.title(f'Pareto Curve for {tableCount} tables, {keyCount} KeyCount')
+    plt.title(f'Pareto Curve for {tableCount} tables, {keyCount * 2} (key) slots')
     plt.legend()
 
     pareto_df.to_csv(output_csv_file_path, index=False)
@@ -58,35 +58,35 @@ def generate_plot(csv_filename, table_count, keyCount):
 
     ax.set_xlabel('Load Factor')
     ax.set_ylabel('Average Lookup Time')
-    ax.set_title(f"Average Lookup Time vs Load Factor for {table_count} Tables, {keyCount*2} (key) slots")
+    ax.set_title(f"Average Lookup Time vs Load Factor for {table_count} Tables, {keyCount * 2} KeyCount")
     ax.grid(True)
     ax.legend()
 
     # Ensure the Plots directory exists
     plot_dir = 'Plots'
-    load_dir = 'LoadFactor'
-    pareto_dir = os.path.join(plot_dir, load_dir, 'Pareto')
+    withvar_dir = 'WithVariance'
+    pareto_dir = os.path.join(plot_dir, withvar_dir, 'Pareto')
     if not os.path.exists(pareto_dir):
         os.makedirs(pareto_dir)
 
-    plot_filename = os.path.join(pareto_dir, f'GenericLoadFactor{keyCount}_{table_count}_Tables.png')
+    plot_filename = os.path.join(pareto_dir, f'GenericWithVariance{keyCount}_{table_count}_Tables.png')
     plt.savefig(plot_filename)
     plt.close(fig)
+
 
 # Define table range 
 start_table_count = 2
 end_table_count = 10
 
-#keyCount = [1000, 5000, 10000, 20000, 50000, 100000]
-keyCount = [100000]
+keyCount = [1000, 5000, 10000, 20000, 50000, 100000]
 
 for i in range(start_table_count, end_table_count + 1):
     for j in keyCount:
-        csv_filename = f'CSV_Files/LoadFactor/GenericLoadFactor{j}_{i}tables.csv'
-        csv_File_Out = f'CSV_Files/LoadFactor/Pareto/GenericParetoData{j}_{i}tables.csv'
+        csv_filename = f'CSV_Files/WithVariance/GenericParetoLoadFactor{j}_{i}tables.csv'
+        csv_File_Out = f'CSV_Files/WithVariance/Pareto/GenericParetoWithVariance{j}_{i}tables.csv'
         generate_pareto_curve(csv_filename, csv_File_Out, i, j)
 
 for i in range(start_table_count, end_table_count + 1):
     for j in keyCount:
-        csv_file = f'CSV_Files/LoadFactor/Pareto/GenericParetoData{j}_{i}tables.csv'
+        csv_file = f'CSV_Files/WithVariance/Pareto/GenericParetoWithVariance{j}_{i}tables.csv'
         generate_plot(csv_file, i, j)

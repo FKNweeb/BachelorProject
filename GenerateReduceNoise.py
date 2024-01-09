@@ -30,12 +30,14 @@ def generate_plot(csv_filename, table_count, keyCount):
         os.makedirs(load_dir)
 
     plot_filename = os.path.join(load_dir, f'GenericLoadFactorReducedNoise{keyCount}_{table_count}Tables.png')
+    plt.show()
     plt.savefig(plot_filename)
     plt.close(fig)
 
 start_table_count = 2
 end_table_count = 10
-keyCount = [1000, 5000, 10000, 20000, 50000, 100000]
+# keyCount = [1000, 5000, 10000, 20000, 50000, 100000]
+keyCount = [100000]
 
 for i in range(start_table_count, end_table_count + 1):
     for j in keyCount:
